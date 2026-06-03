@@ -16,12 +16,12 @@ type Config struct {
 
 func Read() (Config, error) {
 	cfg := Config{}
-	homeDir, err := os.UserHomeDir()
+	cfgPath, err := getConfigFilePath()
 	if err != nil {
 		return cfg, err
 	}
 
-	data, err := os.ReadFile(filepath.Join(homeDir, configFileName))
+	data, err := os.ReadFile(cfgPath)
 	if err != nil {
 		return cfg, err
 	}
@@ -34,25 +34,34 @@ func Read() (Config, error) {
 	return cfg, nil
 }
 
-func SetUser(username string) error {
-	cfg, err := Read()
-	if err != nil {
-		return err
-	}
-
+func (cfg *Config) SetUser(username string) error {
 	cfg.CurrentUserName = username
+	return write(*cfg)
+}
 
+// private
+
+func getConfigFilePath() (string, error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		return err
+		return "", err
 	}
 
+	return filepath.Join(homeDir, configFileName), nil
+}
+
+func write(cfg Config) error {
 	data, err := json.Marshal(&cfg)
 	if err != nil {
 		return err
 	}
 
-	err = os.WriteFile(filepath.Join(homeDir, configFileName), data, 0o644)
+	cfgPath, err := getConfigFilePath()
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(cfgPath, data, 0o644)
 	if err != nil {
 		return err
 	}

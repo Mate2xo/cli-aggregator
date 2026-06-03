@@ -8,20 +8,20 @@ import (
 )
 
 func main() {
-	file, err := config.Read()
+	cfg, err := config.Read()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("error reading config: %v", err)
 	}
-	fmt.Printf("%v\n", file)
+	fmt.Printf("Read config: %+v\n", cfg)
 
-	err = config.SetUser("mate")
+	err = cfg.SetUser("mate")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("couldn't set current user: %v", err)
 	}
 
-	file, err = config.Read()
+	cfg, err = config.Read()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("error reading config: %v", err)
 	}
-	fmt.Printf("%v\n", file)
+	fmt.Printf("Reading config again: %+v\n", cfg)
 }
