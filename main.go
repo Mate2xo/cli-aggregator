@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"log"
+	"os"
 
 	"github.com/Mate2xo/gator/internal/config"
 )
@@ -10,18 +10,27 @@ import (
 func main() {
 	cfg, err := config.Read()
 	if err != nil {
-		log.Fatalf("error reading config: %v", err)
-	}
-	fmt.Printf("Read config: %+v\n", cfg)
-
-	err = cfg.SetUser("mate")
-	if err != nil {
-		log.Fatalf("couldn't set current user: %v", err)
+		log.Fatalf("- Error reading config: %v", err)
 	}
 
-	cfg, err = config.Read()
-	if err != nil {
-		log.Fatalf("error reading config: %v", err)
+	appState := &state{cfg: &cfg}
+	cmds := commands{
+		registered: make(map[string]func(*state, command) error),
 	}
-	fmt.Printf("Reading config again: %+v\n", cfg)
+	cmds.register("login", handlerLogin)
+
+	args := os.Args
+	if len(args) < 2 {
+		log.Fatal("Error: please enter a command name")
+	}
+	command := command{name: args[1], args: args[2:]}
+
+	err = cmds.run(appState, command)
+	if err != nil {
+		log.Fatalf("- Error: %v", err)
+	}
+}
+
+type state struct {
+	cfg *config.Config
 }
