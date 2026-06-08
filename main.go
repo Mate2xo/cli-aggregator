@@ -44,6 +44,7 @@ func initStateAndCommands() (*state, commands, *sql.DB) {
 func registerCommands(cmds commands) {
 	cmds.register("login", handlerLogin)
 	cmds.register("register", handlerRegister)
+	cmds.register("reset", handlerReset)
 }
 
 func buildCommandFrom(args []string) command {
