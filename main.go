@@ -1,35 +1,49 @@
 package main
 
 import (
+	"database/sql"
 	"log"
 	"os"
 
 	"github.com/Mate2xo/gator/internal/config"
+	"github.com/Mate2xo/gator/internal/database"
+	_ "github.com/lib/pq"
 )
 
 func main() {
-	appState, cmds := initStateAndCommands()
-	command := buildCommandFrom(os.Args)
+	appState, cmds, db := initStateAndCommands()
+	defer db.Close()
 
+	command := buildCommandFrom(os.Args)
 	err := cmds.run(appState, command)
 	if err != nil {
 		log.Fatalf("- Error: %v", err)
 	}
 }
 
-func initStateAndCommands() (*state, commands) {
+func initStateAndCommands() (*state, commands, *sql.DB) {
 	cfg, err := config.Read()
-	appState := &state{cfg: &cfg}
 	if err != nil {
 		log.Fatalf("- Error reading config: %v", err)
 	}
+	db, err := sql.Open("postgres", cfg.DBUrl)
+	if err != nil {
+		log.Fatalf("- Error initializing database: %v", err)
+	}
+	dbQueries := database.New(db)
+	appState := &state{cfg: &cfg, db: dbQueries}
 
 	cmds := commands{
 		registered: make(map[string]func(*state, command) error),
 	}
-	cmds.register("login", handlerLogin)
+	registerCommands(cmds)
 
-	return appState, cmds
+	return appState, cmds, db
+}
+
+func registerCommands(cmds commands) {
+	cmds.register("login", handlerLogin)
+	cmds.register("register", handlerRegister)
 }
 
 func buildCommandFrom(args []string) command {
@@ -43,4 +57,5 @@ func buildCommandFrom(args []string) command {
 
 type state struct {
 	cfg *config.Config
+	db  *database.Queries
 }
