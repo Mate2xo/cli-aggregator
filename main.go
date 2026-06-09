@@ -46,6 +46,7 @@ func registerCommands(cmds commands) {
 	cmds.register("register", handlerRegister)
 	cmds.register("reset", handlerReset)
 	cmds.register("users", handlerListUsers)
+	cmds.register("agg", handlerAgg)
 }
 
 func buildCommandFrom(args []string) command {
