@@ -48,6 +48,7 @@ func registerCommands(cmds commands) {
 	cmds.register("users", handlerListUsers)
 	cmds.register("agg", handlerAgg)
 	cmds.register("addfeed", handlerAddFeed)
+	cmds.register("feeds", handlerListFeeds)
 }
 
 func buildCommandFrom(args []string) command {
