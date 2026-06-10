@@ -77,14 +77,11 @@ func (q *Queries) CreateFeedFollow(ctx context.Context, arg CreateFeedFollowPara
 }
 
 const getFeedFollowsForUser = `-- name: GetFeedFollowsForUser :many
-WITH with_user AS (
-  SELECT id, created_at, updated_at, name FROM users WHERE users.name = $1
-)
-SELECT feed_follows.id, feed_follows.created_at, feed_follows.updated_at, feed_follows.feed_id, feed_follows.user_id, feeds.name as feed_name, with_user.name AS user_name
+SELECT feed_follows.id, feed_follows.created_at, feed_follows.updated_at, feed_follows.feed_id, feed_follows.user_id, feeds.name as feed_name, users.name AS user_name
 FROM feed_follows
 INNER JOIN feeds ON feed_id = feeds.id
-INNER JOIN with_user ON feed_follows.user_id = with_user.id
-WHERE feed_follows.user_id = with_user.id
+INNER JOIN users ON feed_follows.user_id = users.id
+WHERE feed_follows.user_id = $1
 `
 
 type GetFeedFollowsForUserRow struct {
@@ -97,8 +94,8 @@ type GetFeedFollowsForUserRow struct {
 	UserName  string
 }
 
-func (q *Queries) GetFeedFollowsForUser(ctx context.Context, name string) ([]GetFeedFollowsForUserRow, error) {
-	rows, err := q.db.QueryContext(ctx, getFeedFollowsForUser, name)
+func (q *Queries) GetFeedFollowsForUser(ctx context.Context, userID uuid.UUID) ([]GetFeedFollowsForUserRow, error) {
+	rows, err := q.db.QueryContext(ctx, getFeedFollowsForUser, userID)
 	if err != nil {
 		return nil, err
 	}

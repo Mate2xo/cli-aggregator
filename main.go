@@ -48,10 +48,10 @@ func registerCommands(cmds commands) {
 	cmds.register("register", handlerRegister)
 	cmds.register("users", handlerListUsers)
 
-	cmds.register("addfeed", handlerAddFeed)
+	cmds.register("addfeed", middlewareLoggedIn(handlerAddFeed))
 	cmds.register("feeds", handlerListFeeds)
-	cmds.register("follow", handlerFollowFeed)
-	cmds.register("following", handlerFollowingFeeds)
+	cmds.register("follow", middlewareLoggedIn(handlerFollowFeed))
+	cmds.register("following", middlewareLoggedIn(handlerFollowingFeeds))
 
 	cmds.register("reset", handlerReset)
 }

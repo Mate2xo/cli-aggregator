@@ -8,7 +8,7 @@ import (
 	"github.com/Mate2xo/gator/internal/database"
 )
 
-func handlerFollowFeed(s *state, cmd command) error {
+func handlerFollowFeed(s *state, cmd command, user database.User) error {
 	if len(cmd.args) != 1 {
 		return errors.New("please enter a <url> argument (usage: follow <url>)")
 	}
@@ -17,10 +17,6 @@ func handlerFollowFeed(s *state, cmd command) error {
 	feed, err := s.db.GetFeedByUrl(context.Background(), url)
 	if err != nil {
 		return fmt.Errorf("could not find feed: %w", err)
-	}
-	user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
-	if err != nil {
-		return fmt.Errorf("could not find user: %w", err)
 	}
 
 	_, err = s.db.CreateFeedFollow(context.Background(), database.CreateFeedFollowParams{
@@ -34,8 +30,8 @@ func handlerFollowFeed(s *state, cmd command) error {
 	return nil
 }
 
-func handlerFollowingFeeds(s *state, cmd command) error {
-	feedFollows, err := s.db.GetFeedFollowsForUser(context.Background(), s.cfg.CurrentUserName)
+func handlerFollowingFeeds(s *state, cmd command, user database.User) error {
+	feedFollows, err := s.db.GetFeedFollowsForUser(context.Background(), user.ID)
 	if err != nil {
 		return fmt.Errorf("could not find feed_follows: %w", err)
 	}

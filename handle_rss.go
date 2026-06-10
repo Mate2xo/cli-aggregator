@@ -20,14 +20,9 @@ func handlerAgg(s *state, cmd command) error {
 	return nil
 }
 
-func handlerAddFeed(s *state, cmd command) error {
+func handlerAddFeed(s *state, cmd command, user database.User) error {
 	if len(cmd.args) != 2 {
 		return errors.New("there should be 2 arguments (usage: addFeed <name> <url>)")
-	}
-
-	currentUser, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
-	if err != nil {
-		return fmt.Errorf("error getting current user: %w", err)
 	}
 
 	name := cmd.args[0]
@@ -39,7 +34,7 @@ func handlerAddFeed(s *state, cmd command) error {
 		UpdatedAt: time.Now().UTC(),
 		Name:      name,
 		Url:       url,
-		UserID:    currentUser.ID,
+		UserID:    user.ID,
 	})
 	if err != nil {
 		return fmt.Errorf("could not create feed: %w", err)
@@ -47,12 +42,12 @@ func handlerAddFeed(s *state, cmd command) error {
 	fmt.Printf("Created feed: %+v\n", feed)
 
 	_, err = s.db.CreateFeedFollow(context.Background(), database.CreateFeedFollowParams{
-		UserID: currentUser.ID, FeedID: feed.ID,
+		UserID: user.ID, FeedID: feed.ID,
 	})
 	if err != nil {
 		return fmt.Errorf("could not follow feed: %w", err)
 	}
-	fmt.Printf("%s is now followed by %s\n", feed.Name, currentUser.Name)
+	fmt.Printf("%s is now followed by %s\n", feed.Name, user.Name)
 
 	return nil
 }
