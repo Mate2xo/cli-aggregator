@@ -42,13 +42,18 @@ func initStateAndCommands() (*state, commands, *sql.DB) {
 }
 
 func registerCommands(cmds commands) {
+	cmds.register("agg", handlerAgg)
+
 	cmds.register("login", handlerLogin)
 	cmds.register("register", handlerRegister)
-	cmds.register("reset", handlerReset)
 	cmds.register("users", handlerListUsers)
-	cmds.register("agg", handlerAgg)
+
 	cmds.register("addfeed", handlerAddFeed)
 	cmds.register("feeds", handlerListFeeds)
+	cmds.register("follow", handlerFollowFeed)
+	cmds.register("following", handlerFollowingFeeds)
+
+	cmds.register("reset", handlerReset)
 }
 
 func buildCommandFrom(args []string) command {

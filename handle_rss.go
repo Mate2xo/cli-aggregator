@@ -25,27 +25,35 @@ func handlerAddFeed(s *state, cmd command) error {
 		return errors.New("there should be 2 arguments (usage: addFeed <name> <url>)")
 	}
 
-	current_user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
+	currentUser, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
 	if err != nil {
 		return fmt.Errorf("error getting current user: %w", err)
 	}
 
 	name := cmd.args[0]
 	url := cmd.args[1]
-	fmt.Printf("name: %v, url: %v", name, url)
+	fmt.Printf("name: %v, url: %v\n", name, url)
 	feed, err := s.db.CreateFeed(context.Background(), database.CreateFeedParams{
 		ID:        uuid.New(),
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
 		Name:      name,
 		Url:       url,
-		UserID:    current_user.ID,
+		UserID:    currentUser.ID,
 	})
 	if err != nil {
 		return fmt.Errorf("could not create feed: %w", err)
 	}
+	fmt.Printf("Created feed: %+v\n", feed)
 
-	fmt.Printf("Created feed: %+v", feed)
+	_, err = s.db.CreateFeedFollow(context.Background(), database.CreateFeedFollowParams{
+		UserID: currentUser.ID, FeedID: feed.ID,
+	})
+	if err != nil {
+		return fmt.Errorf("could not follow feed: %w", err)
+	}
+	fmt.Printf("%s is now followed by %s\n", feed.Name, currentUser.Name)
+
 	return nil
 }
 

@@ -6,8 +6,14 @@ import (
 )
 
 func handlerReset(s *state, cmd command) error {
+	println("> resetting FeedFollows")
+	err := s.db.ResetFeedFollows(context.Background())
+	if err != nil {
+		return fmt.Errorf("could not reset users: %w", err)
+	}
+
 	println("> resetting Users")
-	err := s.db.ResetUsers(context.Background())
+	err = s.db.ResetUsers(context.Background())
 	if err != nil {
 		return fmt.Errorf("could not reset users: %w", err)
 	}
