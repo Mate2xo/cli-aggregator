@@ -7,6 +7,7 @@ package database
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
@@ -18,7 +19,7 @@ WITH created_feed_follow AS (
   VALUES ( $1, $2, NOW(), NOW() )
   RETURNING id, created_at, updated_at, feed_id, user_id
 )
-SELECT created_feed_follow.id, created_feed_follow.created_at, created_feed_follow.updated_at, feed_id, created_feed_follow.user_id, feeds.id, feeds.created_at, feeds.updated_at, feeds.name, url, feeds.user_id, users.id, users.created_at, users.updated_at, users.name,
+SELECT created_feed_follow.id, created_feed_follow.created_at, created_feed_follow.updated_at, feed_id, created_feed_follow.user_id, feeds.id, feeds.created_at, feeds.updated_at, feeds.name, url, feeds.user_id, last_fetched_at, users.id, users.created_at, users.updated_at, users.name,
   feeds.name AS feed_name,
   users.name AS user_name
 FROM created_feed_follow
@@ -32,23 +33,24 @@ type CreateFeedFollowParams struct {
 }
 
 type CreateFeedFollowRow struct {
-	ID          int32
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	FeedID      uuid.UUID
-	UserID      uuid.UUID
-	ID_2        uuid.UUID
-	CreatedAt_2 time.Time
-	UpdatedAt_2 time.Time
-	Name        string
-	Url         string
-	UserID_2    uuid.UUID
-	ID_3        uuid.UUID
-	CreatedAt_3 time.Time
-	UpdatedAt_3 time.Time
-	Name_2      string
-	FeedName    string
-	UserName    string
+	ID            int32
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	FeedID        uuid.UUID
+	UserID        uuid.UUID
+	ID_2          uuid.UUID
+	CreatedAt_2   time.Time
+	UpdatedAt_2   time.Time
+	Name          string
+	Url           string
+	UserID_2      uuid.UUID
+	LastFetchedAt sql.NullTime
+	ID_3          uuid.UUID
+	CreatedAt_3   time.Time
+	UpdatedAt_3   time.Time
+	Name_2        string
+	FeedName      string
+	UserName      string
 }
 
 func (q *Queries) CreateFeedFollow(ctx context.Context, arg CreateFeedFollowParams) (CreateFeedFollowRow, error) {
@@ -66,6 +68,7 @@ func (q *Queries) CreateFeedFollow(ctx context.Context, arg CreateFeedFollowPara
 		&i.Name,
 		&i.Url,
 		&i.UserID_2,
+		&i.LastFetchedAt,
 		&i.ID_3,
 		&i.CreatedAt_3,
 		&i.UpdatedAt_3,
