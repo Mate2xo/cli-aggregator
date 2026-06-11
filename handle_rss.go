@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/Mate2xo/gator/internal/database"
 	"github.com/google/uuid"
@@ -19,12 +18,10 @@ func handlerAddFeed(s *state, cmd command, user database.User) error {
 	url := cmd.args[1]
 	fmt.Printf("name: %v, url: %v\n", name, url)
 	feed, err := s.db.CreateFeed(context.Background(), database.CreateFeedParams{
-		ID:        uuid.New(),
-		CreatedAt: time.Now().UTC(),
-		UpdatedAt: time.Now().UTC(),
-		Name:      name,
-		Url:       url,
-		UserID:    user.ID,
+		ID:     uuid.New(),
+		Name:   name,
+		Url:    url,
+		UserID: user.ID,
 	})
 	if err != nil {
 		return fmt.Errorf("could not create feed: %w", err)
